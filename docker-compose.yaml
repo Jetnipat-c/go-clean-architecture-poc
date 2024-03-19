@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Correct the path to your Dockerfile
+      args:
+        - GITHUB_TOKEN=${GITHUB_TOKEN:-token}
+    image: app
+    container_name: app
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "$PORT:$PORT"
+    depends_on:
+      - postgres
+    volumes:
+      - ./:/app
+
+  postgres:
+    image: postgres:14.0
+    container_name: postgres
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASS
+      - POSTGRES_DB=$DB_NAME
+    ports:
+      - "$DB_PORT:$DB_PORT"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+volumes:
+  dbdata:
